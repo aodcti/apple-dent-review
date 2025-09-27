@@ -61,3 +61,28 @@ sendClinicBtn.addEventListener('click', async ()=>{
   });
   sendClinicBtn.textContent = '医院へ送信しました';
 });
+
+document.getElementById("googleBtn").addEventListener("click", async (e) => {
+  e.preventDefault(); // <a>の通常遷移を止める
+
+  // 1. 入力済みのデータを取得
+  const stars = document.querySelector("input[name='stars']:checked")?.value;
+  const comment = document.getElementById("comment")?.value || "";
+  const ua = navigator.userAgent;
+
+  // 2. GASのdoPostに送信
+  try {
+    await fetch("＜あなたのGASデプロイURL＞", {
+      method: "POST",
+      body: JSON.stringify({ stars, comment, ua }),
+      headers: { "Content-Type": "application/json" }
+    });
+    console.log("医院に送信完了");
+  } catch (err) {
+    console.error("医院への送信エラー:", err);
+  }
+
+  // 3. Googleクチコミページを新しいタブで開く
+  const url = e.target.href; // <a>タグに書いた固定URLを利用
+  window.open(url, "_blank", "noopener");
+});
