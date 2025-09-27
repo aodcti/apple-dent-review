@@ -1,120 +1,75 @@
-// A: GoogleレビューURL（固定）
-const REVIEW_URL = "https://g.page/r/CdhE7fwALR7kEBM/review";
-// 送信先（どちらか1つを使う）
+// 設定
+const REVIEW_URL   = "https://g.page/r/CdhE7fwALR7kEBM/review";
 // const API_ENDPOINT = "＜あなたのGASデプロイURL（/exec）＞";
 const API_ENDPOINT = "/api/submit";
 
-const form = document.getElementById("form");
-const after = document.getElementById("after");
-const msg = document.getElementById("msg");
-const googleBtn = document.getElementById("googleBtn");
-const copyBtn = document.getElementById("copyBtn");
-const sendClinicBtn = document.getElementById("sendClinicBtn");
-const starsPreview = document.getElementById("starsPreview");
-const commentPreview = document.getElementById("commentPreview");
+const starsForm   = document.getElementById("starsForm");
+const lowFlow     = document.getElementById("lowFlow");
+const lowThanks   = document.getElementById("lowThanks");
+const highFlow    = document.getElementById("highFlow");
+const googleBtn   = document.getElementById("googleBtn");
+const lowSendBtn  = document.getElementById("lowSendBtn");
+const detailInput = document.getElementById("detailComment");
+const autoOpenNote= document.getElementById("autoOpenNote");
 
-let lastPayload = null;
+let state = { stars: null, comment: "", ua: navigator.userAgent };
 
-// 星数に応じてボタン表示/非表示を切り替える（★1〜3は全ボタン非表示）
-function updateButtonsByStars(stars) {
-  const hide = stars <= 3;
-  const setVis = (el, visible) => { if (el) el.style.display = visible ? "" : "none"; };
-  setVis(copyBtn, !hide);
-  setVis(sendClinicBtn, !hide);
-  setVis(googleBtn, !hide);
-}
+// ユーティリティ
+const show = el => { if (el) el.hidden = false; };
+const hide = el => { if (el) el.hidden = true; };
 
-// 送信 → サンクス画面切替
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+// ① 初期画面：星を選んだら分岐
+starsForm.addEventListener("change", async (e) => {
+  const v = Number(new FormData(starsForm).get("stars"));
+  if (!v) return; // 念のため
+  state.stars = v;
 
-  const fd = new FormData(form);
-  const stars = Number(fd.get("stars"));         // name="stars"
-  const comment = (document.getElementById("comment")?.value || "").trim();
-  const ua = navigator.userAgent;
+  // 星の選択イベントをサーバに共有（任意。不要なら削除OK）
+  try {
+    navigator.sendBeacon
+      ? navigator.sendBeacon(API_ENDPOINT, new Blob([JSON.stringify({ stars: v, ua: state.ua })], {type: "application/json"}))
+      : await fetch(API_ENDPOINT, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ stars: v, ua: state.ua }), keepalive: true });
+  } catch (_) {}
 
-  if (!stars || stars < 1 || stars > 5) {
-    alert("満足度（星1〜5）を選択してください。");
-    return;
+  // 分岐表示
+  hide(starsForm);
+  if (v <= 3) {
+    show(lowFlow);
+  } else {
+    // ★4〜5：Google誘導＋3.5秒で自動オープン
+    if (googleBtn) googleBtn.href = REVIEW_URL;
+    show(highFlow);
+    if (autoOpenNote) autoOpenNote.textContent = "数秒後にGoogleレビュー投稿ページが自動で開きます。";
+
+    setTimeout(() => {
+      window.open(REVIEW_URL, "_blank", "noopener");
+    }, 3500);
+
+    // クリックでも開ける
+    if (googleBtn) {
+      googleBtn.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        window.open(REVIEW_URL, "_blank", "noopener");
+      }, { once: true });
+    }
   }
+});
 
-  const submitBtn = form.querySelector('button[type="submit"]');
-  if (submitBtn) submitBtn.disabled = true;
+// ② 低評価フロー：コメント送信 → 完了表示
+lowSendBtn?.addEventListener("click", async () => {
+  const comment = (detailInput?.value || "").trim().slice(0, 1000);
+  state.comment = comment;
 
-  // APIへ送信（成功/失敗に関わらず先へ進む）
-  lastPayload = { stars, comment, ua };
+  // 送信（失敗しても完了画面へ進む）
   try {
     await fetch(API_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(lastPayload),
-      keepalive: true,
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ stars: state.stars, comment, ua: state.ua }),
+      keepalive: true
     });
-  } catch (err) {
-    console.warn("submit failed", err);
-  }
+  } catch (_) {}
 
-  // プレビュー反映（星とコメントは別枠）
-  if (starsPreview) starsPreview.textContent = `★${stars}`;
-  if (commentPreview) commentPreview.textContent = comment || "（コメントなし）";
-
-  // メッセージ
-  if (stars <= 3) {
-    msg.innerHTML = 'この度は貴重なご意見をいただきありがとうございました。<br>いただいた内容は院内で共有し、改善に努めて参ります。';
-  } else {
-    msg.innerHTML = 'この度は貴重なご意見をいただきありがとうございました。<br>よろしければ、今の内容を <strong>Googleクチコミ</strong> にもご投稿いただけると励みになります。<br>個人情報は入れないようご注意ください。';
-  }
-
-  // サンクス画面に切り替え
-  if (googleBtn) googleBtn.href = REVIEW_URL;
-  after.hidden = false;
-  form.hidden = true;
-
-  // ★ ボタン出し分け（1〜3は全部隠す）
-  updateButtonsByStars(stars);
-
-  // ★ 星4以上：コメントを自動コピー → 3秒後に自動で新規タブを開く
-  if (stars >= 4) {
-    // コピー（失敗しても続行）
-    if (comment) {
-      navigator.clipboard.writeText(comment).then(
-        () => { /* 成功時なにもしない */ },
-        () => { console.warn("clipboard copy failed"); }
-      );
-    }
-    // 案内を表示して3秒後にタブを自動オープン
-    msg.insertAdjacentHTML(
-      "beforeend",
-      "<p class='note'>7秒後にGoogleクチコミ投稿ページが自動で開きます。<br>すぐに投稿する場合は下の「Googleに投稿」ボタンからも移動できます。</p>"
-    );
-    setTimeout(() => {
-      window.open(REVIEW_URL, "_blank", "noopener");
-    }, 7000);
-  }
-
-  if (submitBtn) submitBtn.disabled = false;
+  hide(lowFlow);
+  show(lowThanks);
 });
-
-// （任意）ユーザーが自分で押した場合：そのまま新規タブを開く
-if (googleBtn) {
-  googleBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    window.open(googleBtn.href || REVIEW_URL, "_blank", "noopener");
-  });
-}
-
-// 「コメントをコピー」：コメントのみコピー（星4以上の時だけボタンは表示される）
-if (copyBtn) {
-  copyBtn.addEventListener("click", async () => {
-    const text = (commentPreview?.textContent || "").trim();
-    if (!text || text === "（コメントなし）") return;
-    try {
-      await navigator.clipboard.writeText(text);
-      const orig = copyBtn.textContent;
-      copyBtn.textContent = "コピーしました";
-      setTimeout(() => (copyBtn.textContent = orig), 1500);
-    } catch {
-      alert("コピーに失敗しました。お手数ですが手動で選択してコピーしてください。");
-    }
-  });
-}
