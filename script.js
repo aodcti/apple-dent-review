@@ -71,16 +71,69 @@ document.getElementById("googleBtn").addEventListener("click", async (e) => {
   const ua = navigator.userAgent;
 
   // 2. GASのdoPostに送信
-  try {
-    await fetch("https://script.google.com/macros/s/AKfycbyusv9pXqRBfCXpIJnWe0eupuwKdWDIfVlp5gnDKk3HL2C74Gcnc4AjWVSpf8GzCjVs/exec", {
-      method: "POST",
-      body: JSON.stringify({ stars, comment, ua }),
-      headers: { "Content-Type": "application/json" }
-    });
-    console.log("医院に送信完了");
-  } catch (err) {
-    console.error("医院への送信エラー:", err);
+  const GAS_ENDPOINT = "＜あなたのGASデプロイURL（/exec）＞";
+
+document.getElementById("form").addEventListener("submit", async (e) => {
+  e.preventDefault(); // フォームの既定送信を止める（画面遷移しない）
+
+  // 二重送信防止（お好みで）
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+
+  // 入力値の取得
+  const stars = Number(document.querySelector("input[name='stars']:checked")?.value);
+  const comment = document.getElementById("comment")?.value || "";
+  const ua = navigator.userAgent;
+
+  // 必須チェック（念のため／HTML側でもrequired済み）
+  if (!stars || stars < 1 || stars > 5) {
+    alert("満足度（星1〜5）を選択してください。");
+    submitBtn.disabled = false;
+    return;
   }
+
+  // GASに送信（★ここで毎回メールが送られる）
+  try {
+    await fetch(GAS_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        stars,
+        comment: comment.slice(0, 1000), // 念のため1000文字制限をクライアントでも
+        ua
+      }),
+    });
+  } catch (err) {
+    // 送信失敗でもUIはサンクス表示に進めるかどうかは方針次第
+    console.error("GAS送信エラー:", err);
+    // 失敗時にユーザーへ通知したいなら↓を有効化
+    // alert("送信に失敗しました。ネットワーク状況をご確認のうえ、もう一度お試しください。");
+  }
+
+  // サンクス画面へ切り替え
+  document.getElementById("form").hidden = true;
+  const after = document.getElementById("after");
+  after.hidden = false;
+
+  // サマリ表示（お好みで）
+  const copyText = document.getElementById("copyText");
+  if (copyText) {
+    copyText.textContent = `【星】${stars}\n${comment || "(コメントなし)"}`;
+  }
+
+  // ★過去の要望に合わせて：星1〜3ならボタンを非表示
+  if (stars <= 3) {
+    const copyBtn = document.getElementById("copyBtn");
+    if (copyBtn) copyBtn.style.display = "none";
+    const clinicBtn = document.getElementById("sendClinicBtn");
+    if (clinicBtn) clinicBtn.style.display = "none";
+    const googleBtn = document.getElementById("googleBtn");
+    if (googleBtn) googleBtn.style.display = "none"; // Googleボタンも消す場合
+  }
+
+  submitBtn.disabled = false; // 念のため復帰
+});
+
 
   // 3. Googleクチコミページを新しいタブで開く
   const url = e.target.href; // <a>タグに書いた固定URLを利用
@@ -90,12 +143,3 @@ document.getElementById("googleBtn").addEventListener("click", async (e) => {
 // サンクス画面を表示した直後に追加
 const stars = Number(document.querySelector("input[name='stars']:checked")?.value);
 
-if (stars <= 3) {
-  // 「内容をコピー」ボタンを非表示
-  const copyBtn = document.getElementById("copyBtn");
-  if (copyBtn) copyBtn.style.display = "none";
-
-  // 「Googleに投稿」ボタンを非表示
-  const googleBtn = document.getElementById("googleBtn");
-  if (googleBtn) googleBtn.style.display = "none";
-}
