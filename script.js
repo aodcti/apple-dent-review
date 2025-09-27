@@ -85,11 +85,11 @@ form.addEventListener("submit", async (e) => {
     // 案内を表示して3秒後にタブを自動オープン
     msg.insertAdjacentHTML(
       "beforeend",
-      "<p class='note'>3秒後にGoogleクチコミ投稿ページが自動で開きます。<br>すぐに投稿する場合は下の「Googleに投稿」ボタンからも移動できます。</p>"
+      "<p class='note'>7秒後にGoogleクチコミ投稿ページが自動で開きます。<br>すぐに投稿する場合は下の「Googleに投稿」ボタンからも移動できます。</p>"
     );
     setTimeout(() => {
       window.open(REVIEW_URL, "_blank", "noopener");
-    }, 3000);
+    }, 7000);
   }
 
   if (submitBtn) submitBtn.disabled = false;
