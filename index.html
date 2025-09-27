@@ -10,16 +10,16 @@
 <main>
   <h1>アップル歯科医院 アンケート</h1>
   <form id="form" class="card">
-    <label>本日のご満足度（星1〜5）</label>
+    <label>ご来院ありがとうございます。当院の対応は総合的にいかがでしょうか。</label>
     <div class="stars" role="radiogroup" aria-label="満足度">
-      <label><input type="radio" name="stars" value="1">★1</label>
-      <label><input type="radio" name="stars" value="2">★2</label>
-      <label><input type="radio" name="stars" value="3">★3</label>
-      <label><input type="radio" name="stars" value="4">★4</label>
-      <label><input type="radio" name="stars" value="5" required>★5</label>
+      <label><input type="radio" name="stars" value="5" required>★5 非常に満足</label>
+      <label><input type="radio" name="stars" value="4">★4 満足</label>
+      <label><input type="radio" name="stars" value="3">★3 普通</label>
+      <label><input type="radio" name="stars" value="2">★1 不満</label>
+      <label><input type="radio" name="stars" value="1">★1 非常に不満</label>
     </div>
 
-    <label for="comment">ご意見・ご感想（任意）</label>
+    <label for="comment">ご意見・ご感想</label>
     <textarea id="comment" maxlength="1000" rows="6" placeholder="個人情報は書かないでください。"></textarea>
 
     <button type="submit" class="primary">送信</button>
@@ -27,14 +27,23 @@
 
   <section id="after" class="card" hidden>
     <h2>ご協力ありがとうございます</h2>
-    <p id="copyText" class="preview"></p>
-    <div id="msg"></div>
-    <div class="actions">
-      <button id="copyBtn">内容をコピー</button>
-      <a id="googleBtn" class="primary" href="https://g.page/r/CdhE7fwALR7kEBM/review" rel="noopener" target="_blank">Googleに投稿</a>
+  
+  <!-- 入力内容プレビュー：星とコメントを別枠に -->
+  <div class="preview-grid">
+    <div class="preview-block">
+      <h3 class="preview-title">ご満足度</h3>
+      <p id="starsPreview" class="preview stars">—</p>
     </div>
-    </section>
-</main>
-<script src="script.js"></script>
-</body>
-</html>
+    <div class="preview-block">
+      <h3 class="preview-title">コメント</h3>
+      <pre id="commentPreview" class="preview comment" aria-label="コメント"></pre>
+    </div>
+  </div>
+
+  <div id="msg" class="msg"></div>
+
+  <div class="actions">
+    <button id="copyBtn">コメントをコピー</button>
+    <a id="googleBtn" class="primary" rel="noopener" target="_blank">Googleに投稿</a>
+    </div>
+</section>
