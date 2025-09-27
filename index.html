@@ -11,9 +11,9 @@
 <main>
   <h1>アップル歯科医院 アンケート</h1>
 
-  <!-- ① 初期画面：星だけ -->
+  <!-- ① 初期画面：星＋次へボタン -->
   <form id="starsForm" class="card" aria-labelledby="q1">
-    <p id="q1">ご来院ありがとうございます。当院の対応は総合的にいかがでしょうか。</p>
+    <p id="q1">ご来院ありがとうございます。当院の対応は総合的にいかがでしょうか。（所要時間1分）</p>
     <div class="stars" role="radiogroup" aria-label="満足度">
       <label><input type="radio" name="stars" value="5" required>★5 非常に満足</label>
       <label><input type="radio" name="stars" value="4">★4 満足</label>
@@ -21,14 +21,15 @@
       <label><input type="radio" name="stars" value="2">★2 不満</label>
       <label><input type="radio" name="stars" value="1">★1 非常に不満</label>
     </div>
-    <p class="note">※星を選ぶと次に進みます</p>
+    <div class="actions">
+      <button type="submit" class="primary">次へ</button>
+    </div>
   </form>
 
   <!-- ② 低評価フロー：コメント入力＋送信 -->
   <section id="lowFlow" class="card" hidden>
     <h2>ご協力ありがとうございます</h2>
     <p>よろしければ具体的な内容についてお聞かせください。</p>
-    <label for="detailComment" class="visually-hidden">コメント</label>
     <textarea id="detailComment" rows="6" maxlength="1000" placeholder="個人情報は書かないでください。"></textarea>
     <div class="actions">
       <button id="lowSendBtn" class="primary">送信</button>
@@ -38,10 +39,10 @@
   <!-- ③ 低評価フロー：送信後の完了表示 -->
   <section id="lowThanks" class="card" hidden>
     <h2>ご協力ありがとうございます</h2>
-    <p>貴重なご意見をいただきありがとうございます。院内で共有し、改善に努めて参ります。</p>
+    <p>貴重なご意見をありがとうございます。院内で共有し、改善に努めて参ります。</p>
   </section>
 
-  <!-- ④ 高評価フロー：Google誘導（自動で3.5秒後に新規タブ） -->
+  <!-- ④ 高評価フロー：Google誘導 -->
   <section id="highFlow" class="card" hidden>
     <h2>ご協力ありがとうございます</h2>
     <p>よろしければGoogle上で具体的な内容をお聞かせください。</p>
