@@ -30,7 +30,20 @@ starsForm.addEventListener("submit", async (e) => {
     // ★1〜3 → コメント入力へ
     lowFlow.hidden = false;
   } else {
-    // ★4〜5 → Google誘導
+    // ★4〜5 → 星のみ送信
+    try {
+      const payload = { stars: v, ua: state.ua };
+      await fetch(API_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      });
+    } catch (err) {
+      console.warn("high rating submit failed", err);
+    }
+
+    // Google誘導
     highFlow.hidden = false;
     if (googleBtn) googleBtn.href = REVIEW_URL;
     if (autoOpenNote) autoOpenNote.textContent = "数秒後にGoogleクチコミ投稿ページが自動で開きます。";
@@ -46,13 +59,13 @@ lowSendBtn?.addEventListener("click", async () => {
   const comment = (detailInput?.value || "").trim().slice(0, 1000);
   state.comment = comment;
 
-  // サーバ送信（省略可）
+  // サーバ送信（星＋コメント）
   try {
     await fetch(API_ENDPOINT, {
       method: "POST",
-      headers: {"Content-Type":"application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ stars: state.stars, comment, ua: state.ua }),
-      keepalive: true
+      keepalive: true,
     });
   } catch (_) {}
 
