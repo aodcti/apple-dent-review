@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>アップル歯科医院 アンケート</title>
   <link rel="stylesheet" href="style.css"/>
-  <!-- JSはDOM構築後に動かしたいのでdeferで読み込む -->
   <script src="script.js" defer></script>
 </head>
 <body>
 <main>
   <h1>アップル歯科医院 アンケート</h1>
 
-  <form id="form" class="card">
-    <label>ご来院ありがとうございます。当院の対応は総合的にいかがでしょうか。</label>
+  <!-- ① 初期画面：星だけ -->
+  <form id="starsForm" class="card" aria-labelledby="q1">
+    <p id="q1">ご来院ありがとうございます。当院の対応は総合的にいかがでしょうか。</p>
     <div class="stars" role="radiogroup" aria-label="満足度">
       <label><input type="radio" name="stars" value="5" required>★5 非常に満足</label>
       <label><input type="radio" name="stars" value="4">★4 満足</label>
@@ -21,34 +21,34 @@
       <label><input type="radio" name="stars" value="2">★2 不満</label>
       <label><input type="radio" name="stars" value="1">★1 非常に不満</label>
     </div>
-
-    <label for="comment">ご意見・ご感想</label>
-    <textarea id="comment" maxlength="1000" rows="6" placeholder="個人情報は書かないでください。"></textarea>
-
-    <button type="submit" class="primary">送信</button>
+    <p class="note">※星を選ぶと次に進みます</p>
   </form>
 
-  <section id="after" class="card" hidden>
+  <!-- ② 低評価フロー：コメント入力＋送信 -->
+  <section id="lowFlow" class="card" hidden>
     <h2>ご協力ありがとうございます</h2>
-
-    <!-- 入力内容プレビュー：星とコメントを別枠に -->
-    <div class="preview-grid">
-      <div class="preview-block">
-        <h3 class="preview-title">満足度</h3>
-        <p id="starsPreview" class="preview stars">—</p>
-      </div>
-      <div class="preview-block">
-        <h3 class="preview-title">コメント</h3>
-        <pre id="commentPreview" class="preview comment" aria-label="コメント"></pre>
-      </div>
-    </div>
-
-    <div id="msg" class="msg" aria-live="polite"></div>
-
+    <p>よろしければ具体的な内容についてお聞かせください。</p>
+    <label for="detailComment" class="visually-hidden">コメント</label>
+    <textarea id="detailComment" rows="6" maxlength="1000" placeholder="個人情報は書かないでください。"></textarea>
     <div class="actions">
-      <button id="copyBtn">コメントをコピー</button>
+      <button id="lowSendBtn" class="primary">送信</button>
+    </div>
+  </section>
+
+  <!-- ③ 低評価フロー：送信後の完了表示 -->
+  <section id="lowThanks" class="card" hidden>
+    <h2>ご協力ありがとうございます</h2>
+    <p>貴重なご意見をいただきありがとうございます。院内で共有し、改善に努めて参ります。</p>
+  </section>
+
+  <!-- ④ 高評価フロー：Google誘導（自動で3.5秒後に新規タブ） -->
+  <section id="highFlow" class="card" hidden>
+    <h2>ご協力ありがとうございます</h2>
+    <p>よろしければGoogle上で具体的な内容をお聞かせください。</p>
+    <div class="actions">
       <a id="googleBtn" class="primary" rel="noopener" target="_blank">Googleに投稿</a>
     </div>
+    <p class="note" id="autoOpenNote" aria-live="polite"></p>
   </section>
 </main>
 </body>
