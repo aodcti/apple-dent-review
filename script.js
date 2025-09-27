@@ -30,9 +30,9 @@ form.addEventListener('submit', async (e)=>{
 
   // 文言：コピーは出し分け。導線は常に両方表示
   if(stars <= 3){
-    msg.innerHTML = 'いただいた内容は院内で共有し、改善に努めます。<br>もしよろしければ、同じ内容を <strong>Googleクチコミ</strong> にもご投稿いただけると助かります。';
+    msg.innerHTML = 'この度は貴重なご意見をいただきありがとうございました。<br>いただいた内容は院内で共有し、改善に努めて参ります。';
   }else{
-    msg.innerHTML = 'よろしければ、今の内容を <strong>Googleクチコミ</strong> にもご投稿いただけると励みになります。<br>個人情報は入れないようご注意ください。';
+    msg.innerHTML = 'この度は貴重なご意見をいただきありがとうございました。<br>よろしければ、今の内容を <strong>Googleクチコミ</strong> にもご投稿いただけると励みになります。<br>個人情報は入れないようご注意ください。';
   }
 
   googleBtn.href = REVIEW_URL;
@@ -72,7 +72,7 @@ document.getElementById("googleBtn").addEventListener("click", async (e) => {
 
   // 2. GASのdoPostに送信
   try {
-    await fetch("＜あなたのGASデプロイURL＞", {
+    await fetch("https://script.google.com/macros/s/AKfycbyusv9pXqRBfCXpIJnWe0eupuwKdWDIfVlp5gnDKk3HL2C74Gcnc4AjWVSpf8GzCjVs/exec", {
       method: "POST",
       body: JSON.stringify({ stars, comment, ua }),
       headers: { "Content-Type": "application/json" }
@@ -86,3 +86,16 @@ document.getElementById("googleBtn").addEventListener("click", async (e) => {
   const url = e.target.href; // <a>タグに書いた固定URLを利用
   window.open(url, "_blank", "noopener");
 });
+
+// サンクス画面を表示した直後に追加
+const stars = Number(document.querySelector("input[name='stars']:checked")?.value);
+
+if (stars <= 3) {
+  // 「内容をコピー」ボタンを非表示
+  const copyBtn = document.getElementById("copyBtn");
+  if (copyBtn) copyBtn.style.display = "none";
+
+  // 「Googleに投稿」ボタンを非表示
+  const googleBtn = document.getElementById("googleBtn");
+  if (googleBtn) googleBtn.style.display = "none";
+}
