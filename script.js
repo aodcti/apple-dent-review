@@ -53,7 +53,7 @@ starsForm.addEventListener("submit", (e) => {
     // 高評価フロー：UI先行→自動オープン
     if (googleBtn) googleBtn.href = REVIEW_URL;
     show(highFlow);
-    if (autoOpenNote) autoOpenNote.textContent = "数秒後にGoogleクチコミ投稿ページが自動で開きます。";
+    if (autoOpenNote) autoOpenNote.textContent = "数秒後にGoogleクチコミ投稿ページが自動で開きます。開かない場合は上のボタンをタップしてください";
 
     // ★ 星だけサーバ共有（UIは待たない）
     fireAndForget(API_ENDPOINT, { stars: v, ua: state.ua });
